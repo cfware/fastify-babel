@@ -1,0 +1,88 @@
+# fastify-babel
+
+[![Travis CI][travis-image]][travis-url]
+[![Greenkeeper badge][gk-image]](https://greenkeeper.io/)
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![MIT][license-image]](LICENSE)
+
+Fastify Babel plugin
+
+### Install fastify-babel
+
+This module requires node.js 8 or above.  It is should normally be used
+with `fastify-static >= 0.12.0`.  This module expects to the local filename
+to be in `payload.filename`.
+
+The intended purpose of this module is for running a test HTTP server directly
+from sources.  This is not meant for production use.
+
+```sh
+npm i --save fastify-babel
+```
+
+## Usage
+
+```js
+'use strict';
+
+const path = require('path');
+const fastify = require('fastify')();
+const fastifyStatic = require('fastify-static');
+const fastifyBabel = require('fastify-babel');
+
+fastify
+	.register(fastifyStatic, {
+		root: path.join(__dirname, 'html/myapp'),
+		prefix: '/myapp',
+	})
+	.register(fastifyStatic, {
+		root: path.join(__dirname, 'node_modules'),
+		prefix: '/node_modules',
+		decorateReply: false,
+	})
+	.register(fastifyBabel, {
+		babelrc: {
+			plugins: ['bare-import-rewrite'],
+		},
+	})
+	.listen(3000, '127.0.0.1', err => {
+		if (err) {
+			throw err;
+		}
+		console.log(`server listening at http://127.0.0.1:${fastify.server.address().port}/`);
+	});
+```
+
+In addition to `fastify-babel` this example requires `fastify-static` and
+`babel-plugin-bare-import-rewrite`.
+
+## Options
+
+### `babelrc`
+
+An object provided directly to babel for each request that is processed.
+Default is empty.
+
+### `babelTypes`
+
+A `RegExp` object used to match the `Content-Type` header.  Only replies with
+matching header will be processed by babel.  Default `/javascript/`.
+
+## Running tests
+
+Tests are provided by xo and ava.
+
+```sh
+npm install
+npm test
+```
+
+[npm-image]: https://img.shields.io/npm/v/fastify-babel.svg
+[npm-url]: https://npmjs.org/package/fastify-babel
+[travis-image]: https://travis-ci.org/cfware/fastify-babel.svg?branch=master
+[travis-url]: https://travis-ci.org/cfware/fastify-babel
+[gk-image]: https://badges.greenkeeper.io/cfware/fastify-babel.svg
+[downloads-image]: https://img.shields.io/npm/dm/fastify-babel.svg
+[downloads-url]: https://npmjs.org/package/fastify-babel
+[license-image]: https://img.shields.io/github/license/cfware/fastify-babel.svg
