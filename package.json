@@ -1,20 +1,24 @@
 {
 	"name": "fastify-babel",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Fastify Babel plugin",
 	"main": "index.js",
 	"scripts": {
 		"test": "xo && nyc ava"
 	},
 	"engines": {
-		"nodejs": ">=8"
+		"node": ">=8"
 	},
 	"author": "Corey Farrell",
 	"license": "MIT",
 	"files": [
-		"*.js"
+		"*.js",
+		"fixtures"
 	],
-	"keywords": [],
+	"keywords": [
+		"fastify",
+		"babel"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/cfware/fastify-babel.git"
