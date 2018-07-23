@@ -18,7 +18,7 @@ The intended purpose of this module is for running a test HTTP server directly
 from sources.  This is not meant for production use.
 
 ```sh
-npm i --save fastify-babel
+npm i --save fastify-babel @babel/core
 ```
 
 ## Usage

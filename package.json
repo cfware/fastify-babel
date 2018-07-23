@@ -28,10 +28,13 @@
 	},
 	"homepage": "https://github.com/cfware/fastify-babel#readme",
 	"dependencies": {
-		"@babel/core": "^7.0.0-beta.47",
 		"fastify-plugin": "^1.0.1"
 	},
+	"peerDependencies": {
+		"@babel/core": "7.0.0-beta.51"
+	},
 	"devDependencies": {
+		"@babel/core": "7.0.0-beta.51",
 		"ava": "^0.25.0",
 		"babel-plugin-bare-import-rewrite": "^0.3.0",
 		"fastify": "^1.5.0",
