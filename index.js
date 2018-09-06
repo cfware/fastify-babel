@@ -20,7 +20,7 @@ function babelPlugin(fastify, opts, next) {
 	function actualSend(payload, next, filename) {
 		const babelOpts = {
 			...opts.babelrc,
-			filename: filename || path.join(process.cwd(), 'index.js'),
+			filename: filename || path.join(process.cwd(), 'index.js')
 		};
 		next(null, babel.transform(payload, babelOpts).code);
 	}
@@ -63,5 +63,5 @@ function babelPlugin(fastify, opts, next) {
 
 module.exports = fp(babelPlugin, {
 	fastify: '>=1.4.0',
-	name: 'fastify-babel',
+	name: 'fastify-babel'
 });

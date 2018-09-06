@@ -8,7 +8,7 @@ import fastifyStatic from 'fastify-static';
 import fastifyBabel from '.';
 
 const fastifyMain = path.join('/node_modules/fastify', fastifyPackage.main);
-const staticContent = `import fastify from 'fastify';\n`;
+const staticContent = 'import fastify from \'fastify\';\n';
 const babelResult = `import fastify from "${fastifyMain}";`;
 const fromModuleSource = 'node_modules/fake-module/fake-module.js';
 const fromModuleResult = `import fastify from "../fastify/${fastifyPackage.main}";`;
@@ -17,15 +17,15 @@ const fromModuleResult = `import fastify from "../fastify/${fastifyPackage.main}
 async function createServer(t, babelTypes) {
 	const appOpts = {
 		root: path.join(__dirname, 'fixtures'),
-		prefix: '/',
+		prefix: '/'
 	};
 	/* Use of babel-plugin-bare-import-rewrite ensures fastify-babel does the
 	 * right thing with payload.filename. */
 	const babelOpts = {
 		babelrc: {
-			plugins: ['bare-import-rewrite'],
+			plugins: ['bare-import-rewrite']
 		},
-		babelTypes,
+		babelTypes
 	};
 	const fastify = fastifyModule();
 
@@ -49,7 +49,7 @@ async function createServer(t, babelTypes) {
 		.register(fastifyStatic, appOpts)
 		.register(fastifyBabel, babelOpts);
 
-	await t.notThrows(fastify.listen(0));
+	await t.notThrowsAsync(fastify.listen(0));
 	fastify.server.unref();
 
 	return `http://127.0.0.1:${fastify.server.address().port}`;
@@ -80,8 +80,8 @@ test('static app js caching', async t => {
 	const resp1 = await got(host + '/test.js');
 	const resp2 = await got(host + '/test.js', {
 		headers: {
-			'If-None-Match': resp1.headers.etag,
-		},
+			'If-None-Match': resp1.headers.etag
+		}
 	});
 
 	t.is(resp2.statusCode, 304);
