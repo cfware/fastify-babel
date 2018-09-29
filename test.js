@@ -1,6 +1,6 @@
 import path from 'path';
 import test from 'ava';
-import got from 'got';
+import fetch from 'node-fetch';
 import sts from 'string-to-stream';
 import fastifyPackage from 'fastify/package';
 import fastifyModule from 'fastify';
@@ -61,7 +61,9 @@ async function runTest(t, url, expected, noBabel, babelTypes) {
 	if (noBabel) {
 		options.headers = {'x-no-babel': 1};
 	}
-	const {body} = await got(host + url, options);
+
+	const res = await fetch(host + url, options);
+	const body = await res.text();
 
 	t.is(body, expected);
 }
@@ -77,12 +79,12 @@ test('from node_module', t => runTest(t, `/${fromModuleSource}`, fromModuleResul
 
 test('static app js caching', async t => {
 	const host = await createServer(t);
-	const resp1 = await got(host + '/test.js');
-	const resp2 = await got(host + '/test.js', {
+	const res1 = await fetch(host + '/test.js');
+	const res2 = await fetch(host + '/test.js', {
 		headers: {
-			'If-None-Match': resp1.headers.etag
+			'If-None-Match': res1.headers.get('etag')
 		}
 	});
 
-	t.is(resp2.statusCode, 304);
+	t.is(res2.status, 304);
 });
