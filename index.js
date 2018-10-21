@@ -22,7 +22,13 @@ function babelPlugin(fastify, opts, next) {
 			...opts.babelrc,
 			filename: filename || path.join(process.cwd(), 'index.js')
 		};
-		next(null, babel.transform(payload, babelOpts).code);
+
+		try {
+			next(null, babel.transform(payload, babelOpts).code);
+		} catch (error) {
+			error.message = `Babel Transform error ${error.code} at line ${error.loc.line}, column ${error.loc.column}.`;
+			next(error);
+		}
 	}
 
 	function babelOnSend(req, reply, payload, next) {

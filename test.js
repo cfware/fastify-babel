@@ -13,6 +13,12 @@ const babelResult = `import fastify from "${fastifyMain}";`;
 const fromModuleSource = 'node_modules/fake-module/fake-module.js';
 const fromModuleResult = `import fastify from "../fastify/${fastifyPackage.main}";`;
 
+const errorMessage = {
+	statusCode: 500,
+	error: 'Internal Server Error',
+	message: 'Babel Transform error BABEL_PARSE_ERROR at line 1, column 0.'
+};
+
 /* eslint-disable max-params */
 async function createServer(t, babelTypes) {
 	const appOpts = {
@@ -76,6 +82,7 @@ test('dynamic undefined js', t => runTest(t, '/undefined.js', ''));
 test('dynamic null js', t => runTest(t, '/null.js', ''));
 test('dynamic js without filename', t => runTest(t, '/nofile.js', babelResult));
 test('from node_module', t => runTest(t, `/${fromModuleSource}`, fromModuleResult));
+test('default error handling', t => runTest(t, '/error.js', JSON.stringify(errorMessage)));
 
 test('static app js caching', async t => {
 	const host = await createServer(t);
