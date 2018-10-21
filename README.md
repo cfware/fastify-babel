@@ -6,7 +6,16 @@
 [![NPM Downloads][downloads-image]][downloads-url]
 [![MIT][license-image]](LICENSE)
 
-Fastify Babel plugin
+Fastify Babel plugin for development servers
+
+### Never load this plugin on production servers
+
+The purpose of this module is for running a test HTTP server directly from
+sources.  Babel transformations are not async and all additional requests are
+blocked while transformation is in process.
+
+You should always use a build step to install pre-transformed files to production
+servers.
 
 ### Install fastify-babel
 
@@ -14,11 +23,8 @@ This module requires node.js 8 or above.  It is should normally be used
 with `fastify-static >= 0.12.0`.  This module expects to the local filename
 to be in `payload.filename`.
 
-The intended purpose of this module is for running a test HTTP server directly
-from sources.  This is not meant for production use.
-
 ```sh
-npm i --save fastify-babel @babel/core
+npm i --save-dev fastify-babel @babel/core
 ```
 
 ## Usage
