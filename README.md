@@ -75,6 +75,11 @@ Default is empty.
 A `RegExp` object used to match the `Content-Type` header.  Only replies with
 matching header will be processed by babel.  Default `/javascript/`.
 
+### `maskError`
+
+Setting this to `false` will allow the full error message to be displayed.  By
+default errors are masked to prevent disclosure of server details.
+
 ## Running tests
 
 Tests are provided by xo and ava.
