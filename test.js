@@ -19,20 +19,23 @@ const errorMessage = {
 	message: 'Babel Transform error BABEL_PARSE_ERROR at line 1, column 0.'
 };
 
+const babelrcBroken = true;
+
+const babelrcError = {
+	statusCode: 500,
+	error: 'Internal Server Error',
+	message: 'Babel Internal Error'
+};
+
 /* eslint-disable max-params */
-async function createServer(t, babelTypes) {
+async function createServer(t, babelTypes, babelrc = {plugins: ['bare-import-rewrite']}) {
 	const appOpts = {
 		root: path.join(__dirname, 'fixtures'),
 		prefix: '/'
 	};
 	/* Use of babel-plugin-bare-import-rewrite ensures fastify-babel does the
 	 * right thing with payload.filename. */
-	const babelOpts = {
-		babelrc: {
-			plugins: ['bare-import-rewrite']
-		},
-		babelTypes
-	};
+	const babelOpts = {babelrc, babelTypes};
 	const fastify = fastifyModule();
 
 	fastify
@@ -61,8 +64,8 @@ async function createServer(t, babelTypes) {
 	return `http://127.0.0.1:${fastify.server.address().port}`;
 }
 
-async function runTest(t, url, expected, noBabel, babelTypes) {
-	const host = await createServer(t, babelTypes);
+async function runTest(t, url, expected, noBabel, babelTypes, babelrc) {
+	const host = await createServer(t, babelTypes, babelrc);
 	const options = {};
 	if (noBabel) {
 		options.headers = {'x-no-babel': 1};
@@ -83,6 +86,7 @@ test('dynamic null js', t => runTest(t, '/null.js', ''));
 test('dynamic js without filename', t => runTest(t, '/nofile.js', babelResult));
 test('from node_module', t => runTest(t, `/${fromModuleSource}`, fromModuleResult));
 test('default error handling', t => runTest(t, '/error.js', JSON.stringify(errorMessage)));
+test('babel exception handling', t => runTest(t, '/test.js', JSON.stringify(babelrcError), false, undefined, {babelrcBroken}));
 
 test('static app js caching', async t => {
 	const host = await createServer(t);

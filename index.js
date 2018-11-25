@@ -26,7 +26,11 @@ function babelPlugin(fastify, opts, next) {
 		try {
 			next(null, babel.transform(payload, babelOpts).code);
 		} catch (error) {
-			error.message = `Babel Transform error ${error.code} at line ${error.loc.line}, column ${error.loc.column}.`;
+			error.message = 'Babel Internal Error';
+			try {
+				error.message = `Babel Transform error ${error.code} at line ${error.loc.line}, column ${error.loc.column}.`;
+			} catch (error) {
+			}
 			next(error);
 		}
 	}
