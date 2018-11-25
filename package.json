@@ -12,8 +12,7 @@
 	"author": "Corey Farrell",
 	"license": "MIT",
 	"files": [
-		"*.js",
-		"fixtures"
+		"index.js"
 	],
 	"keywords": [
 		"fastify",
