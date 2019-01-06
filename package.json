@@ -27,18 +27,18 @@
 	},
 	"homepage": "https://github.com/cfware/fastify-babel#readme",
 	"dependencies": {
-		"fastify-plugin": "^1.2.1"
+		"fastify-plugin": "^1.4.0"
 	},
 	"peerDependencies": {
-		"@babel/core": "^7.1.2"
+		"@babel/core": "^7.2.2"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.1.2",
-		"ava": "^1.0.0-rc.1",
-		"babel-plugin-bare-import-rewrite": "^1.0.0",
-		"fastify": "^1.12.1",
-		"fastify-static": "^1.0.0",
-		"node-fetch": "^2.2.0",
+		"@babel/core": "^7.2.2",
+		"ava": "^1.0.1",
+		"babel-plugin-bare-import-rewrite": "^1.2.0",
+		"fastify": "^1.13.3",
+		"fastify-static": "^1.1.0",
+		"node-fetch": "^2.3.0",
 		"nyc": "^13.1.0",
 		"string-to-stream": "^1.1.1",
 		"xo": "^0.23.0"

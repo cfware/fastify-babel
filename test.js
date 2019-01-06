@@ -7,7 +7,7 @@ import fastifyModule from 'fastify';
 import fastifyStatic from 'fastify-static';
 import fastifyBabel from '.';
 
-const fastifyMain = path.join('/node_modules/fastify', fastifyPackage.main);
+const fastifyMain = path.posix.join('/node_modules/fastify', fastifyPackage.main);
 const staticContent = 'import fastify from \'fastify\';\n';
 const babelResult = `import fastify from "${fastifyMain}";`;
 const fromModuleSource = 'node_modules/fake-module/fake-module.js';
@@ -80,7 +80,7 @@ async function runTest(t, url, expected, {noBabel, babelTypes, babelrc, maskErro
 	const res = await fetch(host + url, options);
 	const body = await res.text();
 
-	t.is(body, expected);
+	t.is(body.replace(/\r\n/, '\n'), expected);
 }
 
 test('static app js', t => runTest(t, '/test.js', babelResult));
