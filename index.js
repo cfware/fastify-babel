@@ -33,6 +33,7 @@ function babelPlugin(fastify, opts, next) {
 				} catch (error) {
 				}
 			}
+
 			next(error);
 		}
 	}

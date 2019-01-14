@@ -33,7 +33,6 @@ const babelrcError = {
 	message: 'Babel Internal Error'
 };
 
-/* eslint-disable max-params */
 async function createServer(t, babelTypes, maskError, babelrc = {plugins: ['bare-import-rewrite']}) {
 	const appOpts = {
 		root: path.join(__dirname, 'fixtures'),
