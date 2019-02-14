@@ -37,7 +37,7 @@
 		"ava": "^1.0.1",
 		"babel-plugin-bare-import-rewrite": "^1.2.0",
 		"fastify": "^1.13.3",
-		"fastify-static": "^1.1.0",
+		"fastify-static": "^2.3.2",
 		"node-fetch": "^2.3.0",
 		"nyc": "^13.1.0",
 		"string-to-stream": "^1.1.1",
