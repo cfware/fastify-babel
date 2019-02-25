@@ -15,6 +15,7 @@ const fromModuleResult = `import fastify from "../fastify/${fastifyPackage.main}
 
 const errorMessage = {
 	statusCode: 500,
+	code: 'BABEL_PARSE_ERROR',
 	error: 'Internal Server Error',
 	message: 'Babel Transform error BABEL_PARSE_ERROR at line 1, column 0.'
 };
