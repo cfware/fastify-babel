@@ -4,6 +4,7 @@
 	"description": "Fastify Babel plugin for development servers",
 	"main": "index.js",
 	"scripts": {
+		"release": "standard-version --sign",
 		"test": "xo && nyc ava"
 	},
 	"engines": {
@@ -40,6 +41,7 @@
 		"fastify-static": "^2.3.4",
 		"node-fetch": "^2.3.0",
 		"nyc": "^13.3.0",
+		"standard-version": "^5.0.0",
 		"string-to-stream": "^1.1.1",
 		"xo": "^0.24.0"
 	},
