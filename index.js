@@ -10,7 +10,7 @@ function shouldBabel(reply, opts) {
 
 function babelPlugin(fastify, opts, next) {
 	if (!opts.babelTypes) {
-		opts.babelTypes = /javascript/;
+		opts.babelTypes = /(java|ecma)script/;
 	}
 
 	fastify.addHook('onSend', babelOnSend);

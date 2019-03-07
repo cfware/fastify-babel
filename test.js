@@ -51,7 +51,7 @@ async function createServer(t, babelTypes, maskError, babelrc = {plugins: ['bare
 			reply.send(null);
 		})
 		.get('/nofile.js', (req, reply) => {
-			reply.header('content-type', 'text/javascript');
+			reply.header('content-type', 'text/ecmascript');
 			reply.send(staticContent);
 		})
 		.get(`/${fromModuleSource}`, (req, reply) => {

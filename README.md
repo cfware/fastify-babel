@@ -73,7 +73,7 @@ Default is empty.
 ### `babelTypes`
 
 A `RegExp` object used to match the `Content-Type` header.  Only replies with
-matching header will be processed by babel.  Default `/javascript/`.
+matching header will be processed by babel.  Default `/(java|ecma)script/`.
 
 ### `maskError`
 
