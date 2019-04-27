@@ -5,7 +5,7 @@ import sts from 'string-to-stream';
 import fastifyPackage from 'fastify/package';
 import fastifyModule from 'fastify';
 import fastifyStatic from 'fastify-static';
-import fastifyBabel from '.';
+import fastifyBabel from '..';
 
 const fastifyMain = path.posix.join('/node_modules/fastify', fastifyPackage.main);
 const staticContent = 'import fastify from \'fastify\';\n';
@@ -56,7 +56,7 @@ async function createServer(t, babelTypes, maskError, babelrc = {plugins: ['bare
 		})
 		.get(`/${fromModuleSource}`, (req, reply) => {
 			const payload = sts(staticContent);
-			payload.filename = path.join(__dirname, fromModuleSource);
+			payload.filename = path.join(__dirname, '..', fromModuleSource);
 
 			reply.header('content-type', 'text/javascript');
 			reply.send(payload);
@@ -83,17 +83,17 @@ async function runTest(t, url, expected, {noBabel, babelTypes, babelrc, maskErro
 	t.is(body.replace(/\r\n/, '\n'), expected);
 }
 
-test('static app js', t => runTest(t, '/test.js', babelResult));
-test('static app js with x-no-babel', t => runTest(t, '/test.js', staticContent, {noBabel: true}));
-test('static app txt', t => runTest(t, '/test.txt', staticContent));
-test('static app txt with custom babelTypes regex', t => runTest(t, '/test.txt', babelResult, {babelTypes: /text/}));
-test('dynamic undefined js', t => runTest(t, '/undefined.js', ''));
-test('dynamic null js', t => runTest(t, '/null.js', ''));
-test('dynamic js without filename', t => runTest(t, '/nofile.js', babelResult));
-test('from node_module', t => runTest(t, `/${fromModuleSource}`, fromModuleResult));
-test('default error handling', t => runTest(t, '/error.js', JSON.stringify(errorMessage)));
-test('babel exception handling', t => runTest(t, '/test.js', JSON.stringify(babelrcError), {babelrc: {babelrcBroken}}));
-test('don\'t hide error details', t => runTest(t, '/test.js', JSON.stringify(unmaskedError), {babelrc: {babelrcBroken}, maskError: false}));
+test('static app js', runTest, '/test.js', babelResult);
+test('static app js with x-no-babel', runTest, '/test.js', staticContent, {noBabel: true});
+test('static app txt', runTest, '/test.txt', staticContent);
+test('static app txt with custom babelTypes regex', runTest, '/test.txt', babelResult, {babelTypes: /text/});
+test('dynamic undefined js', runTest, '/undefined.js', '');
+test('dynamic null js', runTest, '/null.js', '');
+test('dynamic js without filename', runTest, '/nofile.js', babelResult);
+test('from node_module', runTest, `/${fromModuleSource}`, fromModuleResult);
+test('default error handling', runTest, '/error.js', JSON.stringify(errorMessage));
+test('babel exception handling', runTest, '/test.js', JSON.stringify(babelrcError), {babelrc: {babelrcBroken}});
+test('don\'t hide error details', runTest, '/test.js', JSON.stringify(unmaskedError), {babelrc: {babelrcBroken}, maskError: false});
 
 test('static app js caching', async t => {
 	const host = await createServer(t);

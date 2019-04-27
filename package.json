@@ -35,31 +35,20 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.3.3",
+		"@cfware/nyc": "^0.4.2",
 		"ava": "^1.2.1",
 		"babel-plugin-bare-import-rewrite": "^1.3.1",
 		"fastify": "^2.0.0",
 		"fastify-static": "^2.3.4",
 		"node-fetch": "^2.3.0",
-		"nyc": "^14.0.0",
+		"nyc": "^14.1.0",
 		"standard-version": "^5.0.0",
 		"string-to-stream": "^1.1.1",
 		"xo": "^0.24.0"
 	},
-	"nyc": {
-		"check-coverage": true,
-		"per-file": true,
-		"lines": 100,
-		"statements": 100,
-		"functions": 100,
-		"branches": 100,
-		"include": [
-			"*.js",
-			"!test.js"
-		]
-	},
 	"xo": {
 		"ignores": [
-			"fixtures/**"
+			"test/fixtures/**"
 		]
 	}
 }
