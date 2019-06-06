@@ -75,6 +75,6 @@ function babelPlugin(fastify, opts, next) {
 }
 
 module.exports = fp(babelPlugin, {
-	fastify: '>=1.4.0',
+	fastify: '>=2.4.1',
 	name: 'fastify-babel'
 });
