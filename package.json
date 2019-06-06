@@ -2,7 +2,6 @@
 	"name": "fastify-babel",
 	"version": "1.2.0",
 	"description": "Fastify Babel plugin for development servers",
-	"main": "index.js",
 	"scripts": {
 		"release": "standard-version --sign",
 		"test": "xo && nyc ava"
@@ -28,27 +27,27 @@
 	},
 	"homepage": "https://github.com/cfware/fastify-babel#readme",
 	"dependencies": {
-		"fastify-plugin": "^1.5.0"
+		"fastify-plugin": "^1.6.0"
 	},
 	"peerDependencies": {
-		"@babel/core": "^7.3.3"
+		"@babel/core": "^7.4.5"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.3.3",
-		"@cfware/nyc": "^0.4.2",
-		"ava": "^1.2.1",
-		"babel-plugin-bare-import-rewrite": "^1.3.1",
-		"fastify": "^2.0.0",
-		"fastify-static": "^2.3.4",
-		"node-fetch": "^2.3.0",
-		"nyc": "^14.1.0",
+		"@babel/core": "^7.4.5",
+		"@cfware/nyc": "^0.5.0",
+		"ava": "^2.0.0",
+		"babel-plugin-bare-import-rewrite": "^1.5.0",
+		"fastify": "^2.4.1",
+		"fastify-static": "^2.4.0",
+		"node-fetch": "^2.6.0",
+		"nyc": "^14.1.1",
 		"standard-version": "^6.0.1",
 		"string-to-stream": "^1.1.1",
 		"xo": "^0.24.0"
 	},
 	"xo": {
 		"ignores": [
-			"test/fixtures/**"
+			"fixtures/**"
 		]
 	}
 }

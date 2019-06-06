@@ -36,7 +36,7 @@ const babelrcError = {
 
 async function createServer(t, babelTypes, maskError, babelrc = {plugins: ['bare-import-rewrite']}) {
 	const appOpts = {
-		root: path.join(__dirname, 'fixtures'),
+		root: path.join(__dirname, '..', 'fixtures'),
 		prefix: '/'
 	};
 	/* Use of babel-plugin-bare-import-rewrite ensures fastify-babel does the
@@ -83,8 +83,8 @@ async function runTest(t, url, expected, {noBabel, babelTypes, babelrc, maskErro
 	t.is(body.replace(/\r\n/, '\n'), expected);
 }
 
-test('static app js', runTest, '/test.js', babelResult);
-test('static app js with x-no-babel', runTest, '/test.js', staticContent, {noBabel: true});
+test('static app js', runTest, '/import.js', babelResult);
+test('static app js with x-no-babel', runTest, '/import.js', staticContent, {noBabel: true});
 test('static app txt', runTest, '/test.txt', staticContent);
 test('static app txt with custom babelTypes regex', runTest, '/test.txt', babelResult, {babelTypes: /text/});
 test('dynamic undefined js', runTest, '/undefined.js', '');
@@ -92,13 +92,13 @@ test('dynamic null js', runTest, '/null.js', '');
 test('dynamic js without filename', runTest, '/nofile.js', babelResult);
 test('from node_module', runTest, `/${fromModuleSource}`, fromModuleResult);
 test('default error handling', runTest, '/error.js', JSON.stringify(errorMessage));
-test('babel exception handling', runTest, '/test.js', JSON.stringify(babelrcError), {babelrc: {babelrcBroken}});
-test('don\'t hide error details', runTest, '/test.js', JSON.stringify(unmaskedError), {babelrc: {babelrcBroken}, maskError: false});
+test('babel exception handling', runTest, '/import.js', JSON.stringify(babelrcError), {babelrc: {babelrcBroken}});
+test('don\'t hide error details', runTest, '/import.js', JSON.stringify(unmaskedError), {babelrc: {babelrcBroken}, maskError: false});
 
 test('static app js caching', async t => {
 	const host = await createServer(t);
-	const res1 = await fetch(host + '/test.js');
-	const res2 = await fetch(host + '/test.js', {
+	const res1 = await fetch(host + '/import.js');
+	const res2 = await fetch(host + '/import.js', {
 		headers: {
 			'If-None-Match': res1.headers.get('etag')
 		}
