@@ -1,6 +1,6 @@
 {
 	"name": "fastify-babel",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "Fastify Babel plugin for development servers",
 	"scripts": {
 		"release": "standard-version --sign",
