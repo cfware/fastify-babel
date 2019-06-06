@@ -11,9 +11,6 @@
 	},
 	"author": "Corey Farrell",
 	"license": "MIT",
-	"files": [
-		"index.js"
-	],
 	"keywords": [
 		"fastify",
 		"babel"
