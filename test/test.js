@@ -2,6 +2,7 @@ import path from 'path';
 import test from 'ava';
 import fetch from 'node-fetch';
 import sts from 'string-to-stream';
+import QuickLRU from 'quick-lru';
 import fastifyPackage from 'fastify/package';
 import fastifyModule from 'fastify';
 import fastifyStatic from 'fastify-static';
@@ -12,6 +13,11 @@ const staticContent = 'import fastify from \'fastify\';\n';
 const babelResult = `import fastify from "${fastifyMain}";`;
 const fromModuleSource = 'node_modules/fake-module/fake-module.js';
 const fromModuleResult = `import fastify from "../fastify/${fastifyPackage.main}";`;
+
+const appOpts = {
+	root: path.join(__dirname, '..', 'fixtures'),
+	prefix: '/'
+};
 
 const errorMessage = {
 	statusCode: 500,
@@ -35,10 +41,6 @@ const babelrcError = {
 };
 
 async function createServer(t, babelTypes, maskError, babelrc = {plugins: ['bare-import-rewrite']}) {
-	const appOpts = {
-		root: path.join(__dirname, '..', 'fixtures'),
-		prefix: '/'
-	};
 	/* Use of babel-plugin-bare-import-rewrite ensures fastify-babel does the
 	 * right thing with payload.filename. */
 	const babelOpts = {babelrc, babelTypes, maskError};
@@ -105,4 +107,58 @@ test('static app js caching', async t => {
 	});
 
 	t.is(res2.status, 304);
+});
+
+async function testCache(t, cacheHashSalt) {
+	let hits = 0;
+	const hitCounter = () => ({
+		visitor: {
+			Program() {
+				hits++;
+			}
+		}
+	});
+
+	const fastify = fastifyModule();
+	const cache = new QuickLRU({maxSize: 50});
+	fastify
+		.register(fastifyStatic, appOpts)
+		.register(fastifyBabel, {
+			babelrc: {
+				plugins: [
+					'bare-import-rewrite',
+					hitCounter
+				]
+			},
+			cache,
+			cacheHashSalt
+		});
+	await fastify.listen(0);
+	const host = `http://127.0.0.1:${fastify.server.address().port}`;
+
+	const iter = async () => {
+		const res = await fetch(host + '/import.js');
+		const body = await res.text();
+		t.is(body, babelResult);
+		t.is(hits, 1);
+
+		const keys = [...cache.keys()];
+		t.is(keys.length, 1);
+		t.is(cache.get(keys[0]), babelResult);
+
+		return keys[0];
+	};
+
+	const key1 = await iter();
+	const key2 = await iter();
+
+	t.is(key1, key2);
+
+	return key1;
+}
+
+test('caching', async t => {
+	const key = await testCache(t);
+	const saltedKey = await testCache(t, 'salt the hash');
+	t.not(key, saltedKey);
 });

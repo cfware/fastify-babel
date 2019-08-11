@@ -3,6 +3,7 @@
 const path = require('path');
 const fp = require('fastify-plugin');
 const babel = require('@babel/core');
+const hasha = require('hasha');
 
 function shouldBabel(reply, opts) {
 	return opts.babelTypes.test(reply.getHeader('Content-Type') || '');
@@ -12,6 +13,8 @@ function babelPlugin(fastify, opts, next) {
 	if (!opts.babelTypes) {
 		opts.babelTypes = /(java|ecma)script/;
 	}
+
+	const cacheSalt = opts.cacheHashSalt ? hasha(opts.cacheHashSalt, {algorithm: 'sha256'}) : '';
 
 	fastify.addHook('onSend', babelOnSend);
 
@@ -24,7 +27,22 @@ function babelPlugin(fastify, opts, next) {
 		};
 
 		try {
-			next(null, babel.transform(payload, babelOpts).code);
+			let hash;
+			let code;
+
+			if (opts.cache) {
+				hash = hasha([payload, filename, cacheSalt], {algorithm: 'sha256'});
+				code = opts.cache.get(hash);
+			}
+
+			if (typeof code === 'undefined') {
+				code = babel.transform(payload, babelOpts).code;
+				if (opts.cache) {
+					opts.cache.set(hash, code);
+				}
+			}
+
+			next(null, code);
 		} catch (error) {
 			if (opts.maskError !== false) {
 				error.message = 'Babel Internal Error';
@@ -75,6 +93,6 @@ function babelPlugin(fastify, opts, next) {
 }
 
 module.exports = fp(babelPlugin, {
-	fastify: '>=2.4.1',
+	fastify: '>=2.7.1',
 	name: 'fastify-babel'
 });
