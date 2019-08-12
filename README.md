@@ -80,6 +80,15 @@ matching header will be processed by babel.  Default `/(java|ecma)script/`.
 Setting this to `false` will allow the full error message to be displayed.  By
 default errors are masked to prevent disclosure of server details.
 
+### `cache`
+
+A Map-like object for caching transform results.  This object must have support
+for both `get` and `set` methods.
+
+### `cacheHashSalt`
+
+A string used to salt the hash of source content.
+
 ## Running tests
 
 Tests are provided by xo and ava.

@@ -3,6 +3,7 @@
 const path = require('path');
 const fp = require('fastify-plugin');
 const babel = require('@babel/core');
+const hasha = require('hasha');
 
 function shouldBabel(reply, opts) {
 	return opts.babelTypes.test(reply.getHeader('Content-Type') || '');
@@ -13,18 +14,25 @@ function babelPlugin(fastify, opts, next) {
 		opts.babelTypes = /(java|ecma)script/;
 	}
 
+	const cacheSalt = opts.cacheHashSalt ? hasha(opts.cacheHashSalt, {algorithm: 'sha256'}) : '';
+
 	fastify.addHook('onSend', babelOnSend);
 
 	next();
 
-	function actualSend(payload, next, filename) {
+	function actualSend(payload, next, hash, filename) {
 		const babelOpts = {
 			...opts.babelrc,
 			filename: filename || path.join(process.cwd(), 'index.js')
 		};
 
 		try {
-			next(null, babel.transform(payload, babelOpts).code);
+			const {code} = babel.transform(payload, babelOpts);
+			if (hash) {
+				opts.cache.set(hash, code);
+			}
+
+			next(null, code);
 		} catch (error) {
 			if (opts.maskError !== false) {
 				error.message = 'Babel Internal Error';
@@ -52,29 +60,41 @@ function babelPlugin(fastify, opts, next) {
 			return next();
 		}
 
+		reply.removeHeader('content-length');
 		if (payload === '') {
 			/* Skip babel if we have empty payload (304's for example). */
 			return next(null, '');
 		}
 
+		let hash;
+		if (opts.cache) {
+			const cacheTag = reply.getHeader('etag') || reply.getHeader('last-modified');
+			/* If we don't have etag or last-modified assume this is dynamic and not worth caching */
+			if (cacheTag) {
+				/* Prefer payload.filename, then payload it is a string */
+				const filename = typeof payload === 'string' ? payload : payload.filename;
+				hash = hasha([cacheTag, filename, cacheSalt], {algorithm: 'sha256'});
+				const result = opts.cache.get(hash);
+
+				if (typeof result !== 'undefined') {
+					next(null, result);
+					return;
+				}
+			}
+		}
+
 		if (typeof payload === 'string') {
-			actualSend(payload, next);
+			actualSend(payload, next, hash);
 			return;
 		}
 
-		let code = '';
-		payload.on('data', chunk => {
-			code += chunk;
-		});
-		payload.on('end', () => {
-			reply.removeHeader('content-length');
-
-			actualSend(code, next, payload.filename);
-		});
+		const code = [];
+		payload.on('data', chunk => code.push(chunk));
+		payload.on('end', () => actualSend(code.join(''), next, hash, payload.filename));
 	}
 }
 
 module.exports = fp(babelPlugin, {
-	fastify: '>=2.4.1',
+	fastify: '>=2.7.1',
 	name: 'fastify-babel'
 });
