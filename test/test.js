@@ -122,6 +122,15 @@ async function testCache(t, cacheHashSalt) {
 	const fastify = fastifyModule();
 	const cache = new QuickLRU({maxSize: 50});
 	fastify
+		.get('/nofile.js', (req, reply) => {
+			reply.header('content-type', 'text/ecmascript');
+			reply.header('last-modified', 'Mon, 12 Aug 2019 12:00:00 GMT');
+			reply.send(staticContent);
+		})
+		.get('/uncachable.js', (req, reply) => {
+			reply.header('content-type', 'text/ecmascript');
+			reply.send(staticContent);
+		})
 		.register(fastifyStatic, appOpts)
 		.register(fastifyBabel, {
 			babelrc: {
@@ -135,30 +144,58 @@ async function testCache(t, cacheHashSalt) {
 		});
 	await fastify.listen(0);
 	const host = `http://127.0.0.1:${fastify.server.address().port}`;
-
-	const iter = async () => {
-		const res = await fetch(host + '/import.js');
+	const doFetch = async (path, step, prevKeys) => {
+		const res = await fetch(host + path);
 		const body = await res.text();
 		t.is(body, babelResult);
-		t.is(hits, 1);
-
+		t.is(hits, prevKeys ? 2 : step);
 		const keys = [...cache.keys()];
-		t.is(keys.length, 1);
-		t.is(cache.get(keys[0]), babelResult);
+		if (prevKeys) {
+			t.deepEqual(keys, prevKeys);
+		} else {
+			t.is(keys.length, step);
+		}
 
-		return keys[0];
+		return keys;
 	};
 
-	const key1 = await iter();
-	const key2 = await iter();
+	const doUncachable = async (prevKeys, step) => {
+		const res = await fetch(host + '/uncachable.js');
+		const body = await res.text();
+		t.is(body, babelResult);
+		t.is(hits, step);
+		t.deepEqual([...cache.keys()], prevKeys);
+	};
 
-	t.is(key1, key2);
+	const iter = async prevKeys => {
+		let keys = await doFetch('/import.js', 1, prevKeys);
+		if (prevKeys) {
+			t.deepEqual(prevKeys, keys);
+		}
 
-	return key1;
+		const [importKey] = prevKeys || keys;
+		t.is(cache.get(importKey), babelResult);
+
+		keys = await doFetch('/nofile.js', 2, prevKeys);
+		const [nofileKey] = keys.filter(key => key !== importKey);
+		t.is(cache.get(nofileKey), babelResult);
+
+		return [importKey, nofileKey];
+	};
+
+	const keys1 = await iter();
+	const keys2 = await iter(keys1);
+
+	t.deepEqual(keys1, keys2);
+
+	await doUncachable(keys1, 3);
+	await doUncachable(keys1, 4);
+
+	return keys1;
 }
 
 test('caching', async t => {
 	const key = await testCache(t);
 	const saltedKey = await testCache(t, 'salt the hash');
-	t.not(key, saltedKey);
+	t.notDeepEqual(key, saltedKey);
 });

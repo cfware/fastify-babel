@@ -20,26 +20,16 @@ function babelPlugin(fastify, opts, next) {
 
 	next();
 
-	function actualSend(payload, next, filename) {
+	function actualSend(payload, next, hash, filename) {
 		const babelOpts = {
 			...opts.babelrc,
 			filename: filename || path.join(process.cwd(), 'index.js')
 		};
 
 		try {
-			let hash;
-			let code;
-
-			if (opts.cache) {
-				hash = hasha([payload, filename, cacheSalt], {algorithm: 'sha256'});
-				code = opts.cache.get(hash);
-			}
-
-			if (typeof code === 'undefined') {
-				code = babel.transform(payload, babelOpts).code;
-				if (opts.cache) {
-					opts.cache.set(hash, code);
-				}
+			const {code} = babel.transform(payload, babelOpts);
+			if (hash) {
+				opts.cache.set(hash, code);
 			}
 
 			next(null, code);
@@ -70,25 +60,37 @@ function babelPlugin(fastify, opts, next) {
 			return next();
 		}
 
+		reply.removeHeader('content-length');
 		if (payload === '') {
 			/* Skip babel if we have empty payload (304's for example). */
 			return next(null, '');
 		}
 
+		let hash;
+		if (opts.cache) {
+			const cacheTag = reply.getHeader('etag') || reply.getHeader('last-modified');
+			/* If we don't have etag or last-modified assume this is dynamic and not worth caching */
+			if (cacheTag) {
+				/* Prefer payload.filename, then payload it is a string */
+				const filename = typeof payload === 'string' ? payload : payload.filename;
+				hash = hasha([cacheTag, filename, cacheSalt], {algorithm: 'sha256'});
+				const result = opts.cache.get(hash);
+
+				if (typeof result !== 'undefined') {
+					next(null, result);
+					return;
+				}
+			}
+		}
+
 		if (typeof payload === 'string') {
-			actualSend(payload, next);
+			actualSend(payload, next, hash);
 			return;
 		}
 
-		let code = '';
-		payload.on('data', chunk => {
-			code += chunk;
-		});
-		payload.on('end', () => {
-			reply.removeHeader('content-length');
-
-			actualSend(code, next, payload.filename);
-		});
+		const code = [];
+		payload.on('data', chunk => code.push(chunk));
+		payload.on('end', () => actualSend(code.join(''), next, hash, payload.filename));
 	}
 }
 
