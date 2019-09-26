@@ -38,7 +38,7 @@ function babelPlugin(fastify, opts, next) {
 				error.message = 'Babel Internal Error';
 				try {
 					error.message = `Babel Transform error ${error.code} at line ${error.loc.line}, column ${error.loc.column}.`;
-				} catch (error) {
+				} catch (_) {
 				}
 			}
 

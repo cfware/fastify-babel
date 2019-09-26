@@ -1,13 +1,14 @@
+import fs from 'fs';
 import path from 'path';
 import test from 'ava';
 import fetch from 'node-fetch';
 import sts from 'string-to-stream';
 import QuickLRU from 'quick-lru';
-import fastifyPackage from 'fastify/package';
 import fastifyModule from 'fastify';
 import fastifyStatic from 'fastify-static';
 import fastifyBabel from '..';
 
+const fastifyPackage = JSON.parse(fs.readFileSync(require.resolve('fastify/package.json'), 'utf8'));
 const fastifyMain = path.posix.join('/node_modules/fastify', fastifyPackage.main);
 const staticContent = 'import fastify from \'fastify\';\n';
 const babelResult = `import fastify from "${fastifyMain}";`;
