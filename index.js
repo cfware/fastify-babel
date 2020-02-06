@@ -11,7 +11,7 @@ function shouldBabel(reply, opts) {
 
 function babelPlugin(fastify, opts, next) {
 	if (!opts.babelTypes) {
-		opts.babelTypes = /(java|ecma)script/;
+		opts.babelTypes = /(?:java|ecma)script/;
 	}
 
 	const cacheSalt = opts.cacheHashSalt ? hasha(opts.cacheHashSalt, {algorithm: 'sha256'}) : '';

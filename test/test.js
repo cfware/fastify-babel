@@ -1,12 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import test from 'ava';
-import fetch from 'node-fetch';
-import sts from 'string-to-stream';
-import QuickLRU from 'quick-lru';
-import fastifyModule from 'fastify';
-import fastifyStatic from 'fastify-static';
-import fastifyBabel from '..';
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const t = require('libtap');
+const fetch = require('node-fetch');
+const sts = require('string-to-stream');
+const QuickLRU = require('quick-lru');
+const fastifyModule = require('fastify');
+const fastifyStatic = require('fastify-static');
+const fastifyBabel = require('..');
 
 const fastifyPackage = JSON.parse(fs.readFileSync(require.resolve('fastify/package.json'), 'utf8'));
 const fastifyMain = path.posix.join('/node_modules/fastify', fastifyPackage.main);
@@ -14,6 +15,8 @@ const staticContent = 'import fastify from \'fastify\';\n';
 const babelResult = `import fastify from "${fastifyMain}";`;
 const fromModuleSource = 'node_modules/fake-module/fake-module.js';
 const fromModuleResult = `import fastify from "../fastify/${fastifyPackage.main}";`;
+
+const test = (name, helper, ...args) => t.test(name, t => helper(t, ...args));
 
 const appOpts = {
 	root: path.join(__dirname, '..', 'fixtures'),
@@ -43,7 +46,12 @@ const babelrcError = {
 	message: 'Babel Internal Error'
 };
 
-async function createServer(t, babelTypes, maskError, babelrc = {plugins: ['bare-import-rewrite']}) {
+const plugins = [
+	['bare-import-rewrite', {
+		modulesDir: '/node_modules'
+	}]
+];
+async function createServer(t, babelTypes, maskError, babelrc = {plugins}) {
 	/* Use of babel-plugin-bare-import-rewrite ensures fastify-babel does the
 	 * right thing with payload.filename. */
 	const babelOpts = {babelrc, babelTypes, maskError};
@@ -61,7 +69,7 @@ async function createServer(t, babelTypes, maskError, babelrc = {plugins: ['bare
 		})
 		.get(`/${fromModuleSource}`, (req, reply) => {
 			const payload = sts(staticContent);
-			payload.filename = path.join(__dirname, '..', fromModuleSource);
+			payload.filename = path.resolve(__dirname, '..', fromModuleSource);
 
 			reply.header('content-type', 'text/javascript');
 			reply.send(payload);
@@ -69,7 +77,7 @@ async function createServer(t, babelTypes, maskError, babelrc = {plugins: ['bare
 		.register(fastifyStatic, appOpts)
 		.register(fastifyBabel, babelOpts);
 
-	await t.notThrowsAsync(fastify.listen(0));
+	await fastify.listen(0);
 	fastify.server.unref();
 
 	return `http://127.0.0.1:${fastify.server.address().port}`;
@@ -85,7 +93,7 @@ async function runTest(t, url, expected, {noBabel, babelTypes, babelrc, maskErro
 	const res = await fetch(host + url, options);
 	const body = await res.text();
 
-	t.is(body.replace(/\r\n/, '\n'), expected);
+	t.equal(body.replace(/\r\n/, '\n'), expected);
 }
 
 test('static app js', runTest, '/import.js', babelResult);
@@ -109,7 +117,7 @@ test('static app js caching', async t => {
 		}
 	});
 
-	t.is(res2.status, 304);
+	t.equal(res2.status, 304);
 });
 
 async function testCache(t, cacheHashSalt) {
@@ -138,7 +146,7 @@ async function testCache(t, cacheHashSalt) {
 		.register(fastifyBabel, {
 			babelrc: {
 				plugins: [
-					'bare-import-rewrite',
+					...plugins,
 					hitCounter
 				]
 			},
@@ -150,13 +158,13 @@ async function testCache(t, cacheHashSalt) {
 	const doFetch = async (path, step, prevKeys) => {
 		const res = await fetch(host + path);
 		const body = await res.text();
-		t.is(body, babelResult);
-		t.is(hits, prevKeys ? 2 : step);
+		t.equal(body, babelResult);
+		t.equal(hits, prevKeys ? 2 : step);
 		const keys = [...cache.keys()];
 		if (prevKeys) {
-			t.deepEqual(keys, prevKeys);
+			t.same(keys, prevKeys);
 		} else {
-			t.is(keys.length, step);
+			t.equal(keys.length, step);
 		}
 
 		return keys;
@@ -165,23 +173,23 @@ async function testCache(t, cacheHashSalt) {
 	const doUncachable = async (prevKeys, step) => {
 		const res = await fetch(host + '/uncachable.js');
 		const body = await res.text();
-		t.is(body, babelResult);
-		t.is(hits, step);
-		t.deepEqual([...cache.keys()], prevKeys);
+		t.equal(body, babelResult);
+		t.equal(hits, step);
+		t.same([...cache.keys()], prevKeys);
 	};
 
 	const iter = async prevKeys => {
 		let keys = await doFetch('/import.js', 1, prevKeys);
 		if (prevKeys) {
-			t.deepEqual(prevKeys, keys);
+			t.same(prevKeys, keys);
 		}
 
 		const [importKey] = prevKeys || keys;
-		t.is(cache.get(importKey), babelResult);
+		t.equal(cache.get(importKey), babelResult);
 
 		keys = await doFetch('/nofile.js', 2, prevKeys);
 		const [nofileKey] = keys.filter(key => key !== importKey);
-		t.is(cache.get(nofileKey), babelResult);
+		t.equal(cache.get(nofileKey), babelResult);
 
 		return [importKey, nofileKey];
 	};
@@ -189,10 +197,12 @@ async function testCache(t, cacheHashSalt) {
 	const keys1 = await iter();
 	const keys2 = await iter(keys1);
 
-	t.deepEqual(keys1, keys2);
+	t.same(keys1, keys2);
 
 	await doUncachable(keys1, 3);
 	await doUncachable(keys1, 4);
+
+	fastify.server.unref();
 
 	return keys1;
 }
@@ -200,5 +210,5 @@ async function testCache(t, cacheHashSalt) {
 test('caching', async t => {
 	const key = await testCache(t);
 	const saltedKey = await testCache(t, 'salt the hash');
-	t.notDeepEqual(key, saltedKey);
+	t.notSame(key, saltedKey);
 });
