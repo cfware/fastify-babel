@@ -29,6 +29,7 @@ const errorMessage = {
 
 const unmaskedError = {
 	statusCode: 500,
+	code: 'BABEL_UNKNOWN_OPTION',
 	error: 'Internal Server Error',
 	message: 'Unknown option: .babelrcBroken. Check out https://babeljs.io/docs/en/babel-core/#options for more information about options.'
 };
@@ -37,6 +38,7 @@ const babelrcBroken = true;
 
 const babelrcError = {
 	statusCode: 500,
+	code: 'BABEL_UNKNOWN_OPTION',
 	error: 'Internal Server Error',
 	message: 'Babel Internal Error'
 };
