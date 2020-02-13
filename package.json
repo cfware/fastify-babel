@@ -40,7 +40,7 @@
 		"libtap": "^0.2.0",
 		"node-fetch": "^2.6.0",
 		"nyc": "^15.0.0",
-		"quick-lru": "^4.0.1",
+		"quick-lru": "^5.0.0",
 		"standard-version": "^7.0.0",
 		"string-to-stream": "^3.0.0",
 		"xo": "^0.25.3"
