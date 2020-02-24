@@ -43,7 +43,7 @@
 		"quick-lru": "^5.0.0",
 		"standard-version": "^7.0.0",
 		"string-to-stream": "^3.0.0",
-		"xo": "^0.26.0"
+		"xo": "^0.27.0"
 	},
 	"xo": {
 		"ignores": [
