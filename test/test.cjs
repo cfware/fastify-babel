@@ -5,6 +5,7 @@ const t = require('libtap');
 const fetch = require('node-fetch');
 const sts = require('string-to-stream');
 const QuickLRU = require('quick-lru');
+const semver = require('semver');
 const fastifyModule = require('fastify');
 const fastifyStatic = require('fastify-static');
 const fastifyBabel = require('..');
@@ -18,7 +19,7 @@ const fromModuleResult = `import fastify from "../fastify/${fastifyPackage.main}
 
 const test = (name, helper, ...args) => t.test(name, t => helper(t, ...args));
 
-const appOpts = {
+const appOptions = {
 	root: path.join(__dirname, '..', 'fixtures'),
 	prefix: '/'
 };
@@ -54,28 +55,28 @@ const plugins = [
 async function createServer(t, babelTypes, maskError, babelrc = {plugins}) {
 	/* Use of babel-plugin-bare-import-rewrite ensures fastify-babel does the
 	 * right thing with payload.filename. */
-	const babelOpts = {babelrc, babelTypes, maskError};
+	const babelOptions = {babelrc, babelTypes, maskError};
 	const fastify = fastifyModule();
 
 	fastify
-		.get('/undefined.js', (req, reply) => reply.send())
-		.get('/null.js', (req, reply) => {
+		.get('/undefined.js', (request, reply) => reply.send())
+		.get('/null.js', (request, reply) => {
 			reply.header('content-type', 'text/javascript');
 			reply.send(null);
 		})
-		.get('/nofile.js', (req, reply) => {
+		.get('/nofile.js', (request, reply) => {
 			reply.header('content-type', 'text/ecmascript');
 			reply.send(staticContent);
 		})
-		.get(`/${fromModuleSource}`, (req, reply) => {
+		.get(`/${fromModuleSource}`, (request, reply) => {
 			const payload = sts(staticContent);
 			payload.filename = path.resolve(__dirname, '..', fromModuleSource);
 
 			reply.header('content-type', 'text/javascript');
 			reply.send(payload);
 		})
-		.register(fastifyStatic, appOpts)
-		.register(fastifyBabel, babelOpts);
+		.register(fastifyStatic, appOptions)
+		.register(fastifyBabel, babelOptions);
 
 	await fastify.listen(0);
 	fastify.server.unref();
@@ -90,16 +91,16 @@ async function runTest(t, url, expected, {noBabel, babelTypes, babelrc, maskErro
 		options.headers = {'x-no-babel': 1};
 	}
 
-	const res = await fetch(host + url, options);
-	const body = await res.text();
+	const response = await fetch(host + url, options);
+	const body = await response.text();
 
-	t.equal(body.replace(/\r\n/, '\n'), expected);
+	t.equal(body.replace(/\r\n/u, '\n'), expected);
 }
 
 test('static app js', runTest, '/import.js', babelResult);
 test('static app js with x-no-babel', runTest, '/import.js', staticContent, {noBabel: true});
 test('static app txt', runTest, '/test.txt', staticContent);
-test('static app txt with custom babelTypes regex', runTest, '/test.txt', babelResult, {babelTypes: /text/});
+test('static app txt with custom babelTypes regex', runTest, '/test.txt', babelResult, {babelTypes: /text/u});
 test('dynamic undefined js', runTest, '/undefined.js', '');
 test('dynamic null js', runTest, '/null.js', '');
 test('dynamic js without filename', runTest, '/nofile.js', babelResult);
@@ -110,14 +111,14 @@ test('don\'t hide error details', runTest, '/import.js', JSON.stringify(unmasked
 
 test('static app js caching', async t => {
 	const host = await createServer(t);
-	const res1 = await fetch(host + '/import.js');
-	const res2 = await fetch(host + '/import.js', {
+	const response1 = await fetch(`${host}/import.js`);
+	const response2 = await fetch(`${host}/import.js`, {
 		headers: {
-			'If-None-Match': res1.headers.get('etag')
+			'If-None-Match': response1.headers.get('etag')
 		}
 	});
 
-	t.equal(res2.status, 304);
+	t.equal(response2.status, 304);
 });
 
 async function testCache(t, cacheHashSalt) {
@@ -133,16 +134,16 @@ async function testCache(t, cacheHashSalt) {
 	const fastify = fastifyModule();
 	const cache = new QuickLRU({maxSize: 50});
 	fastify
-		.get('/nofile.js', (req, reply) => {
+		.get('/nofile.js', (request, reply) => {
 			reply.header('content-type', 'text/ecmascript');
 			reply.header('last-modified', 'Mon, 12 Aug 2019 12:00:00 GMT');
 			reply.send(staticContent);
 		})
-		.get('/uncachable.js', (req, reply) => {
+		.get('/uncachable.js', (request, reply) => {
 			reply.header('content-type', 'text/ecmascript');
 			reply.send(staticContent);
 		})
-		.register(fastifyStatic, appOpts)
+		.register(fastifyStatic, appOptions)
 		.register(fastifyBabel, {
 			babelrc: {
 				plugins: [
@@ -155,14 +156,14 @@ async function testCache(t, cacheHashSalt) {
 		});
 	await fastify.listen(0);
 	const host = `http://127.0.0.1:${fastify.server.address().port}`;
-	const doFetch = async (path, step, prevKeys) => {
-		const res = await fetch(host + path);
-		const body = await res.text();
+	const doFetch = async (path, step, previousKeys) => {
+		const response = await fetch(host + path);
+		const body = await response.text();
 		t.equal(body, babelResult);
-		t.equal(hits, prevKeys ? 2 : step);
+		t.equal(hits, previousKeys ? 2 : step);
 		const keys = [...cache.keys()];
-		if (prevKeys) {
-			t.same(keys, prevKeys);
+		if (previousKeys) {
+			t.same(keys, previousKeys);
 		} else {
 			t.equal(keys.length, step);
 		}
@@ -170,24 +171,24 @@ async function testCache(t, cacheHashSalt) {
 		return keys;
 	};
 
-	const doUncachable = async (prevKeys, step) => {
-		const res = await fetch(host + '/uncachable.js');
-		const body = await res.text();
+	const doUncachable = async (previousKeys, step) => {
+		const response = await fetch(`${host}/uncachable.js`);
+		const body = await response.text();
 		t.equal(body, babelResult);
 		t.equal(hits, step);
-		t.same([...cache.keys()], prevKeys);
+		t.same([...cache.keys()], previousKeys);
 	};
 
-	const iter = async prevKeys => {
-		let keys = await doFetch('/import.js', 1, prevKeys);
-		if (prevKeys) {
-			t.same(prevKeys, keys);
+	const iter = async previousKeys => {
+		let keys = await doFetch('/import.js', 1, previousKeys);
+		if (previousKeys) {
+			t.same(previousKeys, keys);
 		}
 
-		const [importKey] = prevKeys || keys;
+		const [importKey] = previousKeys || keys;
 		t.equal(cache.get(importKey), babelResult);
 
-		keys = await doFetch('/nofile.js', 2, prevKeys);
+		keys = await doFetch('/nofile.js', 2, previousKeys);
 		const [nofileKey] = keys.filter(key => key !== importKey);
 		t.equal(cache.get(nofileKey), babelResult);
 
@@ -212,3 +213,11 @@ test('caching', async t => {
 	const saltedKey = await testCache(t, 'salt the hash');
 	t.notSame(key, saltedKey);
 });
+
+if (semver.gte(process.versions.node, '13.10.0')) {
+	test('test exports', async t => {
+		const selfRef = require('fastify-babel');
+
+		t.equal(fastifyBabel, selfRef);
+	});
+}

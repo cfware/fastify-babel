@@ -5,36 +5,36 @@ const fp = require('fastify-plugin');
 const babel = require('@babel/core');
 const hasha = require('hasha');
 
-function shouldBabel(reply, opts) {
-	return opts.babelTypes.test(reply.getHeader('Content-Type') || '');
+function shouldBabel(reply, options) {
+	return options.babelTypes.test(reply.getHeader('Content-Type') || '');
 }
 
-function babelPlugin(fastify, opts, next) {
-	if (!opts.babelTypes) {
-		opts.babelTypes = /(?:java|ecma)script/;
+function babelPlugin(fastify, options, next) {
+	if (!options.babelTypes) {
+		options.babelTypes = /(?:java|ecma)script/u;
 	}
 
-	const cacheSalt = opts.cacheHashSalt ? hasha(opts.cacheHashSalt, {algorithm: 'sha256'}) : '';
+	const cacheSalt = options.cacheHashSalt ? hasha(options.cacheHashSalt, {algorithm: 'sha256'}) : '';
 
 	fastify.addHook('onSend', babelOnSend);
 
 	next();
 
 	function actualSend(payload, next, hash, filename) {
-		const babelOpts = {
-			...opts.babelrc,
+		const babelOptions = {
+			...options.babelrc,
 			filename: filename || path.join(process.cwd(), 'index.js')
 		};
 
 		try {
-			const {code} = babel.transform(payload, babelOpts);
+			const {code} = babel.transform(payload, babelOptions);
 			if (hash) {
-				opts.cache.set(hash, code);
+				options.cache.set(hash, code);
 			}
 
 			next(null, code);
 		} catch (error) {
-			if (opts.maskError !== false) {
+			if (options.maskError !== false) {
 				error.message = 'Babel Internal Error';
 				try {
 					error.message = `Babel Transform error ${error.code} at line ${error.loc.line}, column ${error.loc.column}.`;
@@ -46,12 +46,12 @@ function babelPlugin(fastify, opts, next) {
 		}
 	}
 
-	function babelOnSend(req, reply, payload, next) {
-		if (req.headers['x-no-babel'] !== undefined) {
+	function babelOnSend(requests, reply, payload, next) {
+		if (requests.headers['x-no-babel'] !== undefined) {
 			return next();
 		}
 
-		if (!shouldBabel(reply, opts)) {
+		if (!shouldBabel(reply, options)) {
 			return next();
 		}
 
@@ -67,14 +67,14 @@ function babelPlugin(fastify, opts, next) {
 		}
 
 		let hash;
-		if (opts.cache) {
+		if (options.cache) {
 			const cacheTag = reply.getHeader('etag') || reply.getHeader('last-modified');
 			/* If we don't have etag or last-modified assume this is dynamic and not worth caching */
 			if (cacheTag) {
 				/* Prefer payload.filename, then payload it is a string */
 				const filename = typeof payload === 'string' ? payload : payload.filename;
 				hash = hasha([cacheTag, filename, cacheSalt], {algorithm: 'sha256'});
-				const result = opts.cache.get(hash);
+				const result = options.cache.get(hash);
 
 				if (typeof result !== 'undefined') {
 					next(null, result);
