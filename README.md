@@ -1,10 +1,4 @@
-# fastify-babel
-
-[![Travis CI][travis-image]][travis-url]
-[![Greenkeeper badge][gk-image]](https://greenkeeper.io/)
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-[![MIT][license-image]](LICENSE)
+# fastify-babel [![NPM Version][npm-image]][npm-url]
 
 Fastify Babel plugin for development servers
 
@@ -19,8 +13,8 @@ servers.
 
 ### Install fastify-babel
 
-This module requires node.js 8 or above.  It is should normally be used
-with `fastify-static >= 0.12.0`.  This module expects to the local filename
+This module requires node.js 10 or above.  It is should normally be used
+with `fastify-static >= 0.12.0`.  This module requires the local filename
 to be in `payload.filename`.
 
 ```sh
@@ -89,15 +83,6 @@ for both `get` and `set` methods.
 
 A string used to salt the hash of source content.
 
-## Running tests
-
-Tests are provided by xo and ava.
-
-```sh
-npm install
-npm test
-```
-
 ## `fastify-babel` for enterprise
 
 Available as part of the Tidelift Subscription.
@@ -106,9 +91,3 @@ The maintainers of `fastify-babel` and thousands of other packages are working w
 
 [npm-image]: https://img.shields.io/npm/v/fastify-babel.svg
 [npm-url]: https://npmjs.org/package/fastify-babel
-[travis-image]: https://travis-ci.org/cfware/fastify-babel.svg?branch=master
-[travis-url]: https://travis-ci.org/cfware/fastify-babel
-[gk-image]: https://badges.greenkeeper.io/cfware/fastify-babel.svg
-[downloads-image]: https://img.shields.io/npm/dm/fastify-babel.svg
-[downloads-url]: https://npmjs.org/package/fastify-babel
-[license-image]: https://img.shields.io/github/license/cfware/fastify-babel.svg
