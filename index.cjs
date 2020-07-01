@@ -56,7 +56,6 @@ function babelPlugin(fastify, options, next) {
 		}
 
 		if (payload === null) {
-			reply.res.log.warn('babel: missing payload');
 			return next();
 		}
 
