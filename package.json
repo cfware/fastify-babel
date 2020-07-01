@@ -1,51 +1,51 @@
 {
-	"name": "fastify-babel",
-	"version": "1.3.0",
-	"description": "Fastify Babel plugin for development servers",
-	"main": "index.cjs",
-	"exports": "./index.cjs",
-	"scripts": {
-		"pretest": "cfware-lint .",
-		"tests-only": "nyc -s node test/test.cjs",
-		"test": "npm run -s tests-only",
-		"posttest": "nyc report --check-coverage"
-	},
-	"engines": {
-		"node": ">=10"
-	},
-	"author": "Corey Farrell",
-	"license": "MIT",
-	"keywords": [
-		"fastify",
-		"babel"
-	],
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/cfware/fastify-babel.git"
-	},
-	"bugs": {
-		"url": "https://github.com/cfware/fastify-babel/issues"
-	},
-	"homepage": "https://github.com/cfware/fastify-babel#readme",
-	"dependencies": {
-		"fastify-plugin": "^2.0.0",
-		"hasha": "^5.0.0"
-	},
-	"peerDependencies": {
-		"@babel/core": "^7.5.5"
-	},
-	"devDependencies": {
-		"@babel/core": "^7.5.5",
-		"@cfware/lint": "^1.0.0",
-		"@cfware/nyc": "^0.7.0",
-		"babel-plugin-bare-import-rewrite": "^2.0.0",
-		"fastify": "^3.0.0-rc.5",
-		"fastify-static": "^3.0.1",
-		"libtap": "^0.3.0",
-		"node-fetch": "^2.6.0",
-		"nyc": "^15.0.0",
-		"quick-lru": "^5.0.0",
-		"semver": "^7.1.3",
-		"string-to-stream": "^3.0.0"
-	}
+  "name": "fastify-babel",
+  "version": "2.0.0",
+  "description": "Fastify Babel plugin for development servers",
+  "main": "index.cjs",
+  "exports": "./index.cjs",
+  "scripts": {
+    "pretest": "cfware-lint .",
+    "tests-only": "nyc -s node test/test.cjs",
+    "test": "npm run -s tests-only",
+    "posttest": "nyc report --check-coverage"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "author": "Corey Farrell",
+  "license": "MIT",
+  "keywords": [
+    "fastify",
+    "babel"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cfware/fastify-babel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cfware/fastify-babel/issues"
+  },
+  "homepage": "https://github.com/cfware/fastify-babel#readme",
+  "dependencies": {
+    "fastify-plugin": "^2.0.0",
+    "hasha": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.5.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@cfware/lint": "^1.0.0",
+    "@cfware/nyc": "^0.7.0",
+    "babel-plugin-bare-import-rewrite": "^2.0.0",
+    "fastify": "^3.0.0-rc.5",
+    "fastify-static": "^3.0.1",
+    "libtap": "^0.3.0",
+    "node-fetch": "^2.6.0",
+    "nyc": "^15.0.0",
+    "quick-lru": "^5.0.0",
+    "semver": "^7.1.3",
+    "string-to-stream": "^3.0.0"
+  }
 }
