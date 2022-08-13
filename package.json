@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.18.10",
-		"@cfware/lint": "^2.0.6",
+		"@cfware/lint": "^3.0.0",
 		"@cfware/nyc": "^0.7.1",
 		"@fastify/static": "^6.5.0",
 		"babel-plugin-bare-import-rewrite": "^2.0.0",

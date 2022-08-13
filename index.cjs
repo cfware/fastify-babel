@@ -1,6 +1,6 @@
 'use strict';
 
-const path = require('path');
+const path = require('node:path');
 const fp = require('fastify-plugin');
 const babel = require('@babel/core');
 const hasha = require('hasha');
@@ -39,8 +39,7 @@ function babelPlugin(fastify, options, next) {
 				let message = 'Babel Internal Error';
 				try {
 					message = `Babel Transform error ${error.code} at line ${error.loc.line}, column ${error.loc.column}.`;
-				} catch {
-				}
+				} catch {}
 
 				/* istanbul ignore next */
 				try {
