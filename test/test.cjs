@@ -80,8 +80,8 @@ async function createServer(t, babelTypes, maskError, babelrc = defaultBabelRC) 
 		.register(fastifyStatic, appOptions)
 		.register(fastifyBabel, babelOptions);
 
-	await fastify.listen(0);
-	fastify.server.unref();
+	await fastify.listen();
+	t.teardown(() => fastify.server.unref());
 
 	return `http://127.0.0.1:${fastify.server.address().port}`;
 }
