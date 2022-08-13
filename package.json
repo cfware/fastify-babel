@@ -11,7 +11,7 @@
 		"posttest": "nyc report --check-coverage"
 	},
 	"engines": {
-		"node": ">=10"
+		"node": ">=14"
 	},
 	"author": "Corey Farrell",
 	"license": "MIT",
@@ -28,24 +28,24 @@
 	},
 	"homepage": "https://github.com/cfware/fastify-babel#readme",
 	"dependencies": {
-		"fastify-plugin": "^2.0.0",
-		"hasha": "^5.0.0"
+		"fastify-plugin": "^4.1.0",
+		"hasha": "^5.2.2"
 	},
 	"peerDependencies": {
-		"@babel/core": "^7.5.5"
+		"@babel/core": "^7.18.10"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.5.5",
-		"@cfware/lint": "^1.0.0",
-		"@cfware/nyc": "^0.7.0",
+		"@babel/core": "^7.18.10",
+		"@cfware/lint": "^2.0.6",
+		"@cfware/nyc": "^0.7.1",
+		"@fastify/static": "^6.5.0",
 		"babel-plugin-bare-import-rewrite": "^2.0.0",
-		"fastify": "^3.0.0-rc.5",
-		"fastify-static": "^3.0.1",
-		"libtap": "^0.3.0",
-		"node-fetch": "^2.6.0",
-		"nyc": "^15.0.0",
-		"quick-lru": "^5.0.0",
-		"semver": "^7.1.3",
-		"string-to-stream": "^3.0.0"
+		"fastify": "^4.4.0",
+		"libtap": "^1.4.0",
+		"node-fetch": "^2",
+		"nyc": "^15.1.0",
+		"quick-lru": "^5",
+		"semver": "^7.3.7",
+		"string-to-stream": "^3.0.1"
 	}
 }

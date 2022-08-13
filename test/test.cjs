@@ -7,7 +7,7 @@ const sts = require('string-to-stream');
 const QuickLRU = require('quick-lru');
 const semver = require('semver');
 const fastifyModule = require('fastify');
-const fastifyStatic = require('fastify-static');
+const fastifyStatic = require('@fastify/static');
 const fastifyBabel = require('..');
 
 const fastifyPackage = JSON.parse(fs.readFileSync(require.resolve('fastify/package.json'), 'utf8'));
@@ -52,7 +52,9 @@ const plugins = [
 		modulesDir: '/node_modules'
 	}]
 ];
-async function createServer(t, babelTypes, maskError, babelrc = {plugins}) {
+const defaultBabelRC = {plugins};
+
+async function createServer(t, babelTypes, maskError, babelrc = defaultBabelRC) {
 	/* Use of babel-plugin-bare-import-rewrite ensures fastify-babel does the
 	 * right thing with payload.filename. */
 	const babelOptions = {babelrc, babelTypes, maskError};
@@ -189,7 +191,7 @@ async function testCache(t, cacheHashSalt) {
 		t.equal(cache.get(importKey), babelResult);
 
 		keys = await doFetch('/nofile.js', 2, previousKeys);
-		const [nofileKey] = keys.filter(key => key !== importKey);
+		const nofileKey = keys.find(key => key !== importKey);
 		t.equal(cache.get(nofileKey), babelResult);
 
 		return [importKey, nofileKey];

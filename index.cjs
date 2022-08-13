@@ -34,15 +34,29 @@ function babelPlugin(fastify, options, next) {
 
 			next(null, code);
 		} catch (error) {
+			let sendError = error;
 			if (options.maskError !== false) {
-				error.message = 'Babel Internal Error';
+				let message = 'Babel Internal Error';
 				try {
-					error.message = `Babel Transform error ${error.code} at line ${error.loc.line}, column ${error.loc.column}.`;
-				} catch (_) {
+					message = `Babel Transform error ${error.code} at line ${error.loc.line}, column ${error.loc.column}.`;
+				} catch {
+				}
+
+				/* istanbul ignore next */
+				try {
+					// Current versions of babel set the property readonly but configurable
+					const desc = Object.getOwnPropertyDescriptor(sendError, 'message');
+					desc.value = message;
+					Object.defineProperty(sendError, 'message', desc);
+				} catch {
+					// Last resort if 'message' property is not configurable
+					const {code} = sendError;
+					sendError = new Error(message);
+					sendError.code = code;
 				}
 			}
 
-			next(error);
+			next(sendError);
 		}
 	}
 
@@ -94,6 +108,6 @@ function babelPlugin(fastify, options, next) {
 }
 
 module.exports = fp(babelPlugin, {
-	fastify: '>=2.7.1',
+	fastify: '>=4.4.0',
 	name: 'fastify-babel'
 });
