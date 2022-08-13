@@ -1,6 +1,6 @@
 {
 	"name": "fastify-babel",
-	"version": "2.0.0",
+	"version": "3.0.0",
 	"description": "Fastify Babel plugin for development servers",
 	"main": "index.cjs",
 	"exports": "./index.cjs",
