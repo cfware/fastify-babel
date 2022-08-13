@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://www.github.com/cfware/fastify-babel/compare/v2.0.0...v3.0.0) (2022-08-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* fastify 4.4.0 is now required
+* node.js 14 is now required
+
+### Features
+
+* Update dependencies ([79843e0](https://www.github.com/cfware/fastify-babel/commit/79843e04627e6fbdfc32df3f242a30252834c6ea))
+
 ## [2.0.0](https://github.com/cfware/fastify-babel/compare/v1.3.0...v2.0.0) (2020-07-03)
 
 
