@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/cfware/fastify-babel/compare/v3.0.0...v4.0.0) (2023-10-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update dependencies
+
+### Features
+
+* Update dependencies ([efac160](https://github.com/cfware/fastify-babel/commit/efac1604d86704962ef7d73761d63ab4aff0e3f9))
+
 ## [3.0.0](https://github.com/cfware/fastify-babel/compare/v2.0.0...v3.0.0) (2022-08-13)
 
 
